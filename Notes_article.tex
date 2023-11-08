@@ -23,15 +23,13 @@
 \newcommand{\red}[1]{\textcolor{red}{#1}}
 
 \title{Notes on the article : Hyperspherical Variational Auto-Encoders}
-\author{Ines Vati}
-\date{2023–11–02}
 
 \begin{document}
 
 \maketitle
 
 \section{Expected project outcomes}
-No report, only a presentation :
+No report, only a 7-minute presentation :
 un \textbf{très court résumé de la contribution proposée dans l'article} et surtout vous concentrer sur une \textbf{critique en lien avec le cours}.
 Si c'est un article théorique, qu'apporte-t-il de plus que ce qu'on a vu en cours et est-ce un apport ou paie-t-on le prix ailleurs avec d'autres conditions ? \textbf{La preuve a-t-elle un schéma classique ?} etc..
 Si l'article est méthodologique, \textbf{qu'en pensez-vous ? Pouvez-vous reproduire facilement les résultats de l'article avec votre implémentation ?}
@@ -47,7 +45,7 @@ Their experiments show that :
 Some data types are better explained through spherical reprensentations like \textit{directional data}?? (e. g. protein structure, observed wind directions). Few machine learning techniques explicitly account for the intrinsically spherical structure of some data in the modeling process.
 Uniform distribution on the hypersphere is conveniently recovered as a special cas of the vMF.
 
-\includegraphics[width=\textwidth]{spherical_video.png}
+\includegraphics[width=\textwidth]{figures/spherical_video.png}
 
 \section{Variational Auto encoders}
 
@@ -105,16 +103,20 @@ The above expression cannot be handled by automatic differentiation packages bec
     Lemma 2 shows that the distribution can be reparameterized
     \item In high dimension, the surface area collapse to zero (\textit{vanishing surface problem}) $\rightarrow$ unstable behavior of this model in high dimensions
 \end{itemize}
- 
+
+\textbf{variational inference} : optimization method that aims at estimating probability distributions with a simpler one \\
+
 \red{acceptance-rejection scheme} : ???  \\ 
+
 \red{Householder reflection} : ??? \\ 
+
 \red{Reparameterization trick} :
 How to used backpropagation through the sampling node ? \\
 Reparameterization trick enables backpropagation through the sampling node by introducing a deterministic variable (named accepted variable?) $\epsilon$ and a differentiable function $g$ 
 such that a sample $z\sim q_\psi(z|x; \theta)$ is expressed as $z=g(\epsilon, \theta, x)$. Indeed, after sampling $epsilon$ during forward pass, it is fixed.
 \begin{figure}[!h]
-    \includegraphics[scale=0.4]{reparametrization.png}
-    \includegraphics[scale=0.4]{reparam_backprop.png}
+    \includegraphics[scale=0.4]{figures/reparametrization.png}
+    \includegraphics[scale=0.4]{figures/reparam_backprop.png}
 \end{figure}
 
 \section{Experiments}
@@ -139,7 +141,7 @@ such that a sample $z\sim q_\psi(z|x; \theta)$ is expressed as $z=g(\epsilon, \t
 \end{itemize}
 
 
-link prediction : ?
+link prediction : ? \\ 
 citation network dataset : ?
 
 
@@ -149,7 +151,15 @@ citation network dataset : ?
 
 Code freely available on: https://github.com/ nicola-decao/s-vae
 
+\red{From first meeting held on 2023-11-08} : the project will consist in three important parts :
 \begin{itemize}
-    \item reproduce experiment 1 with another latent structure like an ellipse and/or sample from another distribution on a spherical structure
+    \item introduction
+    \item present variational auto-encoder (from the paper on \textit{Tutorial on VAE} )
+    \item present methods involved in the replacement of gaussians with vMF distributions (sampling and reparametrization trick)
+    \item reproduce one experiment from the article, preferably the third one about link prediction on graph : \textit{it is reproduceable with our limited means ?} 
+    \item conclusion
 \end{itemize}
+
+Possible problems : what criticism related to the course can we make ? 
+
 \end{document}
