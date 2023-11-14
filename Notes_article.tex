@@ -6,6 +6,8 @@
 \usepackage{graphicx}
 \usepackage[utf8]{inputenc}
 \usepackage{xcolor}
+\usepackage[colorlinks=true, urlcolor=blue, linkcolor=red]{hyperref} % add hyperlinks; \href{URL}{TEXT}; \href{run:./sample.txt}{here} links to local files
+
 
 \newcommand{\sca}[2]{\left \langle #1 \middle| #2 \right \rangle} % inner product
 \newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
@@ -48,6 +50,9 @@ Uniform distribution on the hypersphere is conveniently recovered as a special c
 \includegraphics[width=\textwidth]{figures/spherical_video.png}
 
 \section{Variational Auto encoders}
+In the "Generative" algorithm setup, we have access to examples $X$ distributed according a unknown distribution $P_{gt}(X)$ and we aim at learning a model $P_{\theta}(X)$ which we can sample from, and 
+which as similar as possible to $P_{gt}(X)$. \\
+VAEs do make an approximation, but the error introduced by this approximation is arguably small given high-capacity models. \\ 
 
 Notations :
 \begin{align*}
@@ -137,7 +142,14 @@ such that a sample $z\sim q_\psi(z|x; \theta)$ is expressed as $z=g(\epsilon, \t
             \end{enumerate}
                 
     \item $\mathcal{S}$-VAEs improve link prediction performance for three citation network datasets in combination with a \textit{Variational Graph Auto-encoder} (VGAE) \\
-            data with a non-Euclidean latent representation of low dimensionality 
+            data with a non-Euclidean latent representation of low dimensionality : https://paperswithcode.com/paper/variational-graph-auto-encoders 
+            \begin{enumerate}
+                \item considere undirected and unweighted graphs
+                \item popular citation network datasets : Cora, Citeseer and Pubmed. goal : recover link between node
+                \item models trained on an incomplete version of the dataset where parts of the citation links (edges) have been removed while all nodes features are kept
+                \item evaluation : area under the ROC curve (AUC) and average precision (AP)
+                \item load dataset : \href{https://pytorch-geometric.readthedocs.io/en/latest/generated/torch_geometric.datasets.Planetoid.html#torch_geometric.datasets.Planetoid}{av pyg}
+            \end{enumerate}
 \end{itemize}
 
 
@@ -149,7 +161,7 @@ citation network dataset : ?
 
 \section{My feedbacks / comments / critics}
 
-Code freely available on: https://github.com/ nicola-decao/s-vae
+Code with pytorch freely available on: https://github.com/nicola-decao/s-vae-pytorch
 
 \red{From first meeting held on 2023-11-08} : the project will consist in three important parts :
 \begin{itemize}
