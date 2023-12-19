@@ -1,0 +1,112 @@
+\documentclass[hyperref={pdftex}]{beamer}
+\useoutertheme{shadow}
+\usetheme{Madrid}
+% \addbibresource{references.bib}
+
+
+\setbeamertemplate{section in toc}{\inserttocsectionnumber.~\inserttocsection}
+
+\definecolor{mvablue}{rgb}{0.1098, 0.1373, 0.5137}
+\definecolor{mvapurple}{rgb}{0.3373, 0.1529, 0.4510}
+\definecolor{mvared}{rgb}{0.5725, 0.1882, 0.3922}
+
+\colorlet{titleleft}{mvablue}
+\colorlet{titlemiddle}{mvapurple}
+\colorlet{titleright}{mvared}
+
+\pgfdeclarehorizontalshading[titleleft,titlemiddle,titleright]
+      {beamer@frametitleshade}{\paperheight}{
+    color(0pt)=(titleleft);
+    color(0.5\paperwidth)=(titlemiddle);
+    color(\paperwidth)=(titleright)
+  }
+
+\useinnertheme{tcolorbox}
+\addtobeamertemplate{title}{
+  \begingroup
+  \tcbset{
+    enhanced,
+    interior style={left color=mvablue,right color=mvared}
+  }
+}{\endgroup}
+
+\title{Computational Statistics}
+\subtitle{\textit{Hyperspherical VAE}}
+
+\author{Victor Deng \and Inès Vati}
+\institute[MVA]{École Normale Supérieure Paris-Saclay, Master MVA}
+\date{Presentation date$>$ \\ \vspace{0.3cm} \includegraphics[scale=0.2]{figures/teaser.png}}
+
+\logo{\includegraphics[width=0.6cm]{figures/MVA-logo.png}}
+
+\setbeamercolor{author in head/foot}{parent=palette primary,bg=}
+\setbeamercolor{title in head/foot}{parent=palette secondary,bg=}
+
+\makeatletter
+\setbeamertemplate{footline}
+{
+    \leavevmode%
+    \setbox\beamer@tempbox=\hbox{%
+        \begin{beamercolorbox}[wd=.5\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+            \usebeamerfont{author in head/foot}\insertshortauthor\expandafter\beamer@ifempty\expandafter{\beamer@shortinstitute}{}{~~(\insertshortinstitute)}
+        \end{beamercolorbox}%
+        \begin{beamercolorbox}[wd=.5\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+            \usebeamerfont{title in head/foot}\insertshorttitle
+        \end{beamercolorbox}%
+        }%
+        \beamer@tempdim=\ht\beamer@tempbox%
+        \advance\beamer@tempdim by 4pt%
+        \begin{pgfpicture}{0pt}{0pt}{\paperwidth}{10pt}
+            \pgfpathrectangle{\pgfpointorigin}{\pgfpoint{\paperwidth}{\beamer@tempdim}}
+            \pgfusepath{clip}
+            \pgftext[left,base]{\pgfuseshading{beamer@frametitleshade}}
+        \end{pgfpicture}
+        \vskip-\beamer@tempdim%
+        \box\beamer@tempbox%    
+}%
+\makeatother
+  
+\newcommand{\myitem}{\item[$\rightarrow$]}
+\newcommand{\mycoolitem}{\item[\checkmark]}
+\AtBeginSection[]
+{
+\begin{frame}{Table of contents}
+\vfill
+\tableofcontents[currentsection, hideallsubsections]
+\vfill
+\end{frame}
+}
+
+\begin{document}
+\frame[plain]{\titlepage}
+
+\begin{frame}
+   \frametitle{Table of contents}
+   \tableofcontents[subsectionstyle=hide]
+\end{frame} 
+
+\section{Introduction} 
+\begin{frame}{Introduction}
+  introduire la méthode et les contributions \cite{davidson_hyperspherical_2022}
+  \end{frame}
+
+\section{Sampling method}
+\input{content/1sampling.tex}
+
+
+\section{Reparameterization Trick}
+\input{content/2reparameterization.tex}
+
+\section{Experiments on link prediction}
+\input{content/3experiments.tex}
+
+
+\section{Conclusion and Discussion} 
+\input{content/4conclusion.tex}
+
+\begin{frame}{References}
+  \bibliographystyle{plain} % Warning cite reference not with number but with name
+  \bibliography{references}
+\end{frame}
+
+\end{document}
