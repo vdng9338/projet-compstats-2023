@@ -35,6 +35,11 @@ No report, only a 7-minute presentation :
 un \textbf{très court résumé de la contribution proposée dans l'article} et surtout vous concentrer sur une \textbf{critique en lien avec le cours}.
 Si c'est un article théorique, qu'apporte-t-il de plus que ce qu'on a vu en cours et est-ce un apport ou paie-t-on le prix ailleurs avec d'autres conditions ? \textbf{La preuve a-t-elle un schéma classique ?} etc..
 Si l'article est méthodologique, \textbf{qu'en pensez-vous ? Pouvez-vous reproduire facilement les résultats de l'article avec votre implémentation ?}
+Pas de résumé du papier, elles ont lu l'article et elles l'ont compris 
+ 
+Lecture critique : dans la séance 10 on verra des schémas de preuve classique, est ce que ça suit le même schéma, quelles autres méthodes ne fonctionnent pas , quelles sont les hypothèses, quelles conditions ils lèvent 
+
+"Pas de bonnes réponses"
 
 \section{Contribution}
 The Gaussian distribution is widely used in Variational Autoender models but it fails to model data with a latent hyperspherical structure. The authors replace it with the Von Mises-Fisher (vMF) distribution leading to a hyperspherical latent space.
@@ -81,7 +86,7 @@ Limitation of gaussian distribution :
 
 \section{Replacing Gaussian with Von-Mises Fisher}
 
-Analogous to the Gaussian distribution, the vMF is parameterized by $\mu\in\RR^m$ , the mean direction, and $\kappa\in\RR^+$, the concentration parameter around $mu$. For $\kappa=0$, the vMF distribution represents a Uniform distribution on the hypersphere.
+Analogous to the Gaussian distribution, the vMF is parameterized by $\mu\in\RR^m$, the mean direction, and $\kappa\in\RR^+$, the concentration parameter around $\mu$. For $\kappa=0$, the vMF distribution represents a Uniform distribution on the hypersphere.
 For a random unit vector $z\in\RR^m$, ($z\in\mathcal{S}^{m-1}$), the vMF distribution is defined as :
 \begin{align*}
     q(z|\mu, \kappa) &= C_m(\kappa) exp(\kappa \mu^T z) \\
@@ -98,10 +103,18 @@ Since the KL term does not depend on $\mu$, this is only optimized in the recons
 The above expression cannot be handled by automatic differentiation packages because of the modified Bessel function. Thus, we derive the gradient of the KL divergence with respect to $\kappa$. \\ 
 \begin{itemize}
     \item \textbf{To sample from vMF} using the procedure of Ulrich \\
-        sampling $q(z|e_1, \kappa)$  with $e_1 = (1, 0, \dots, 0)$ using \blue{acceptance-rejection sampling} \\ 
-        apply an orthogonal transformation $U$ so that the transformed sampled is distributed according to $q(z|\mu, \kappa)$ \\
-        The Householder reflection simply finds an orthonormal transformation $U(\mu)$ that maps vector $e_1$ to $\mu$. \\
-        apply $U$ to $z'$ obtained from $w$ and another sample $v$ from a uniform distribution
+        \begin{enumerate}
+            \item sample $z' \sim q(z| z_1, \kappa)$ \\
+                 sample $w \sim g(w | \kappa, d)$ par acceptance rejection sampling (car la distribution vMF est uniforme sur les sous-hypersphère de dimension $d-2$)\\
+                 et sample $v \sim \mathcal{U}(S^{d-2})$ uniform sur l'hypersphere de dimension $d-2$ \\
+                 $z' = (w, (\sqrt{1 - w^2})v^T)^T$
+            \item definir la reflection de Householder $U(\mu)$ tel que $U(\mu)e_1 = \mu$ \\
+                $u = Normalize(e_1 - \mu$) \\
+                $U = I - 2uu^T$
+            \item $z = Uz' \sim q(z | \mu, \kappa)$
+
+        \end{enumerate}
+
         \textbf{The sampling technique does not suffer from the curse of dimensionality as we first sample from a univariate distribution}
         
     \item \textbf{Extend the reparametrization trick to vMF}\\ 
@@ -111,9 +124,7 @@ The above expression cannot be handled by automatic differentiation packages bec
 
 \textbf{variational inference} : optimization method that aims at estimating probability distributions with a simpler one \\
 
-\red{acceptance-rejection scheme} : ???  \\ 
-
-\red{Householder reflection} : ??? \\ 
+\red{Householder reflection} : also called Householder transformation is the reflection of a point $x$ about an hyperplane defined by its unit normal vector $v$. This transformation is given by the matrix $U = I - 2vv^T$ where $I$ is the identity matrix. Ici, elle est utilisé pour trouver une transformation orthonormal (qui conserve entre autre les distances) qui transforme $e_1=(1, 0, \dots, 0)$ en $\mu$ s. t. $Ue_1 = \mu$\\ 
 
 \red{Reparameterization trick} :
 How to used backpropagation through the sampling node ? \\
@@ -144,11 +155,11 @@ such that a sample $z\sim q_\psi(z|x; \theta)$ is expressed as $z=g(\epsilon, \t
     \item $\mathcal{S}$-VAEs improve link prediction performance for three citation network datasets in combination with a \textit{Variational Graph Auto-encoder} (VGAE) \\
             data with a non-Euclidean latent representation of low dimensionality : https://paperswithcode.com/paper/variational-graph-auto-encoders 
             \begin{enumerate}
-                \item considere undirected and unweighted graphs
+                \item consider undirected and unweighted graphs
                 \item popular citation network datasets : Cora, Citeseer and Pubmed. goal : recover link between node
                 \item models trained on an incomplete version of the dataset where parts of the citation links (edges) have been removed while all nodes features are kept
                 \item evaluation : area under the ROC curve (AUC) and average precision (AP)
-                \item load dataset : \href{https://pytorch-geometric.readthedocs.io/en/latest/generated/torch_geometric.datasets.Planetoid.html#torch_geometric.datasets.Planetoid}{av pyg}
+                \item load dataset : \href{https://pytorch-geometric.readthedocs.io/en/latest/generated/torch_geometric.datasets.Planetoid.html#torch_geometric.datasets.Planetoid}{with pyg}
             \end{enumerate}
 \end{itemize}
 
