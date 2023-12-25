@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from link_prediction.models import VGAE
+from models import VGAE
 from torch_geometric import datasets
 
 def main():
