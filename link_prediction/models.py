@@ -29,8 +29,8 @@ class VGAEEncoder(nn.Module):
         X = self.conv1(X, graph)
         X = self.relu1(X)
         X = self.dropout1(X)
-        mus = self.conv2_mu(X)
-        sigma2s_kappas = self.softplus(self.conv2_sigma2_kappa(X))
+        mus = self.conv2_mu(X, graph)
+        sigma2s_kappas = self.softplus(self.conv2_sigma2_kappa(X, graph))
         if self.latent_distr == 'vMF':
             mus = F.normalize(mus, dim=-1)
         return mus, sigma2s_kappas
@@ -69,5 +69,5 @@ class VGAE(nn.Module):
             mus, sigma2s = self.encoder(X, graph)
             sigmas = torch.sqrt(sigma2s)
             eps = self.normal.sample(mus.size())
-            Z = mus + sigmas.unsqueeze(1) * eps
+            Z = mus + sigmas * eps
         return F.sigmoid(torch.matmul(Z, Z.transpose(0, 1)))
