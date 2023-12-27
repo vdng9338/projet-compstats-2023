@@ -104,7 +104,7 @@ The above expression cannot be handled by automatic differentiation packages bec
 \begin{itemize}
     \item \textbf{To sample from vMF} using the procedure of Ulrich \\
         \begin{enumerate}
-            \item sample $z' \sim q(z| z_1, \kappa)$ \\
+            \item sample $z' \sim q(z| e_1, \kappa)$ \\
                  sample $w \sim g(w | \kappa, d)$ par acceptance rejection sampling (car la distribution vMF est uniforme sur les sous-hypersphère de dimension $d-2$)\\
                  et sample $v \sim \mathcal{U}(S^{d-2})$ uniform sur l'hypersphere de dimension $d-2$ \\
                  $z' = (w, (\sqrt{1 - w^2})v^T)^T$
@@ -130,10 +130,13 @@ The above expression cannot be handled by automatic differentiation packages bec
 How to used backpropagation through the sampling node ? \\
 Reparameterization trick enables backpropagation through the sampling node by introducing a deterministic variable (named accepted variable?) $\epsilon$ and a differentiable function $g$ 
 such that a sample $z\sim q_\psi(z|x; \theta)$ is expressed as $z=g(\epsilon, \theta, x)$. Indeed, after sampling $epsilon$ during forward pass, it is fixed.
-\begin{figure}[!h]
-    \includegraphics[scale=0.4]{figures/reparametrization.png}
-    \includegraphics[scale=0.4]{figures/reparam_backprop.png}
-\end{figure}
+% \begin{figure}[!h]
+%     \includegraphics[scale=0.4]{figures/reparametrization.png}
+%     \includegraphics[scale=0.4]{figures/reparam_backprop.png}
+% \end{figure}
+
+\section{Note on the sampling method}
+
 
 \section{Experiments}
 
@@ -177,7 +180,6 @@ Code with pytorch freely available on: https://github.com/nicola-decao/s-vae-pyt
 \red{From first meeting held on 2023-11-08} : the project will consist in three important parts :
 \begin{itemize}
     \item introduction
-    \item present variational auto-encoder (from the paper on \textit{Tutorial on VAE} )
     \item present methods involved in the replacement of gaussians with vMF distributions (sampling and reparametrization trick)
     \item reproduce one experiment from the article, preferably the third one about link prediction on graph : \textit{it is reproduceable with our limited means ?} 
     \item conclusion
