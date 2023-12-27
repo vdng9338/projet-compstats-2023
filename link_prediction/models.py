@@ -70,4 +70,8 @@ class VGAE(nn.Module):
             sigmas = torch.sqrt(sigma2s)
             eps = self.normal.sample(mus.size())
             Z = mus + sigmas * eps
-        return F.sigmoid(torch.matmul(Z, Z.transpose(0, 1)))
+        ZZt = torch.matmul(Z, Z.transpose(0, 1))
+        if self.latent_distr == 'vMF':
+            return ZZt, mus, kappas
+        else:
+            return ZZt, mus, sigma2s
