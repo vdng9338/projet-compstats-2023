@@ -1,6 +1,50 @@
-\begin{frame}{Reparameterization Trick Victor}
-    Regarder si la démonstration de la SGD marche même avec une espérance qui dépend de $\theta$ (reparameterization trick)
+\begin{frame}{Reparameterization Trick} % TODO Terminer
+  The authors use a reparameterization trick that has been extended to distributions that can be sampled using rejection sampling \cite{naesseth2020reparameterization}.
   
-  Faire des expériences : échantillonnage d'une vMF, dataset Cora
-  
+  \begin{algorithm}[H]
+    \caption{Reparameterized Rejection Sampling (from \cite{naesseth2020reparameterization})}\label{alg:rejectionsampling}
+    \begin{algorithmic}[1]
+    %\REQUIRE target $q(z; \theta)$, proposal $r(z; \theta)$, and constant $M_\theta$, with $q(z; \theta) \leq M_\theta r(z; \theta)$ 
+    %\ENSURE $\varepsilon$ such that $h(\varepsilon,\theta) \sim q(z; \theta)$
+    \STATE $i \gets 0$
+    \REPEAT 
+    \STATE $i \gets i +1 $
+    \STATE Propose $\varepsilon_i \sim s(\varepsilon)$
+    \STATE Simulate $u_i \sim \mathcal{U}[0,1]$
+    \UNTIL $u_i < \frac{g\left(h(\varepsilon_i,\theta); \theta\right)}{r\left(h(\varepsilon_i,\theta) ; \theta\right)}$
+    \RETURN $\varepsilon_i$
+    \end{algorithmic}
+    \end{algorithm}
+
   \end{frame}
+
+% \begin{frame}{Monte Carlo estimates}
+%   Estimating gradients with Monte Carlo estimates:
+%   $$ \nabla_\theta \mathbb{E}_{g(\omega|\theta)}[f(\omega)] = \mathbb{E}_{\pi(\varepsilon|{\color{red}\theta})}[f(h(\varepsilon, \theta))] + \mathbb{E}_{\pi(\varepsilon|{\color{red}\theta})}\left[f(h(\varepsilon,\theta)) \nabla_\theta \log \frac{g(h(\varepsilon, \theta)|\theta)}{r(h(\varepsilon, \theta)|\theta)}\right] $$
+%   Problem: the expectation is with respect to a distribution that depends on $\theta$.
+  
+%   No easy way to write it as $ \mathbb{E}[g(\theta, W)] $ with $W$ a random variable.
+
+%   No reference to a convergence proof in \cite{davidson_hyperspherical_2022,naesseth2020reparameterization,paisley2012variational,mnih2014neural} 
+%     %Regarder si la démonstration de la SGD marche même avec une espérance qui dépend de $\theta$ (reparameterization trick)
+  
+%   %Faire des expériences : échantillonnage d'une vMF, dataset Cora
+  
+% \end{frame}
+
+\begin{frame}{Monte Carlo estimation}
+  By noting $\pi(\varepsilon|\theta)$ the distribution of the resulting $\varepsilon$, we have
+  $$ \nabla_\theta \mathbb{E}_{g(\varepsilon|\theta)}[...] = \mathbb{E}_{\pi(\varepsilon|\theta)}[...] ~ {"}{=} ~ \mathbb{E}_{(\varepsilon_i, U_i)_i}[...]" $$
+  \medskip
+
+  % Similar to usual reparameterization trick (without rejection sampling), where
+  % we compute Monte Carlo estimates of
+  % $$ \nabla_\theta \mathbb{E}_{s(\varepsilon)}[f(h(\varepsilon, \theta), \theta)] $$
+  % where $s(\varepsilon)$ is independent of $\theta$
+  % \medskip
+
+  Problem: $(\varepsilon_i, U_i)_{i \in \mathbb{N}}$ is not a random variable
+  (it is a stochastic process)
+
+  No reference to a convergence proof in \cite{davidson_hyperspherical_2022,naesseth2020reparameterization,paisley2012variational,mnih2014neural}
+\end{frame}
