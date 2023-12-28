@@ -1,5 +1,0 @@
-\beamer@sectionintoc {1}{Introduction}{3}{0}{1}
-\beamer@sectionintoc {2}{Sampling method}{5}{0}{2}
-\beamer@sectionintoc {3}{Reparameterization Trick}{7}{0}{3}
-\beamer@sectionintoc {4}{Experiments on link prediction}{9}{0}{4}
-\beamer@sectionintoc {5}{Conclusion and Discussion}{11}{0}{5}

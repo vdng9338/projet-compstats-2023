@@ -85,4 +85,17 @@
 	On remplace le prior par la distribution uniforme sur $\mathcal{S}^{m-1}$. La divergence KL (équation \ref{eqn:VAE_core}, droite) a une forme close.
 	
 	Échantillonnage d'une vMF : cf papier. On ne souffre pas du curse of dimensionality, car on fait un rejection sampling en 1D.
+
+	\section{À faire}
+	\begin{itemize}
+		\item Coder le sampling de la vMF avec reparameterization trick (Inès)
+		\item Notes explicatives sur le sampling (Inès)
+		\item Comprendre l'entraînement (les 15\% d'arêtes retirées, est-ce qu'une epoch = envoyer tout le graphe au modèle ?) (Inès et Victor)
+		\item Entraînement dans le cas normal, voir si on reproduit les résultats de Hyperspherical VAE et de Kipf et Welling (Victor)
+		\item Calcul du gradient avec la vMF (?)
+		\item Entraînement avec vMF (?)
+		\item Slides et présentation (plus tard)
+	\end{itemize}
+
+	Problèmes avec la SGD avec des espérances selon des distributions qui dépend de $\theta$ en partie 3 des slides
 \end{document}
