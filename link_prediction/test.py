@@ -43,7 +43,7 @@ def kl_divergence(mus, logsigma2s):
     return .5*(k*torch.sum(torch.exp(logsigma2s)) + torch.tensordot(mus, mus) - N*k - k*torch.sum(logsigma2s))
 
 def elbo_estimate(model_output, mus, logsigma2s, adj_matrix):
-    return log_likelihood(adj_matrix, model_output, 100) - 1/len(mus)*kl_divergence(mus, logsigma2s)
+    return log_likelihood(adj_matrix, model_output, 200) - kl_divergence(mus, logsigma2s)
 
 def labels_probs(model_output, pos_edge_list, neg_edge_list):
     prob_matrix = torch.sigmoid(model_output).cpu().detach()
