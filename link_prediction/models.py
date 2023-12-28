@@ -30,10 +30,10 @@ class VGAEEncoder(nn.Module):
         X = self.relu1(X)
         X = self.dropout1(X)
         mus = self.conv2_mu(X, graph)
-        sigma2s_kappas = self.softplus(self.conv2_sigma2_kappa(X, graph))
+        logsigma2s_kappas = self.conv2_sigma2_kappa(X, graph)
         if self.latent_distr == 'vMF':
             mus = F.normalize(mus, dim=-1)
-        return mus, sigma2s_kappas
+        return mus, logsigma2s_kappas
     
 class VGAE(nn.Module):
 
@@ -57,7 +57,8 @@ class VGAE(nn.Module):
     
     def forward(self, X, graph):
         if self.latent_distr == 'vMF':
-            mus, kappas = self.encoder(X, graph)
+            mus, logkappas = self.encoder(X, graph)
+            kappas = torch.exp(logkappas)
             m = self.latent_dim
             n = X.size(0)
             b = (-2*kappas + torch.sqrt(4*kappas**2 + (m-1)**2))/(m-1)
@@ -66,12 +67,12 @@ class VGAE(nn.Module):
             sampled = torch.zeros(n, dtype=torch.bool, device=X.device)
             raise ValueError # TODO: Implement
         else:
-            mus, sigma2s = self.encoder(X, graph)
-            sigmas = torch.sqrt(sigma2s)
+            mus, logsigma2s = self.encoder(X, graph)
+            sigmas = torch.exp(.5*logsigma2s)
             eps = self.normal.sample(mus.size())
             Z = mus + sigmas * eps
         ZZt = torch.matmul(Z, Z.transpose(0, 1))
         if self.latent_distr == 'vMF':
-            return ZZt, mus, kappas
+            return ZZt, mus, logkappas
         else:
-            return ZZt, mus, sigma2s
+            return ZZt, mus, logsigma2s
