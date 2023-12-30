@@ -64,6 +64,7 @@ class VonMisesFisher():
 
     def householder_transform(self, x):
         e = torch.zeros(self.dim)
+        e[0] = 1
         u = e - self.mu
         u = u / (u.norm(dim=-1, keepdim=True) + 1e-8)
 
