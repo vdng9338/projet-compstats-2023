@@ -38,7 +38,7 @@ class VonMisesFisher():
     
     def sample_w(self, n_samples):
         """ acceptance rejection sampling """
-        sqrt = np.sqrt(2 * self.kappa**2 + (self.dim-1)**2)
+        sqrt = np.sqrt(4 * self.kappa**2 + (self.dim-1)**2)
         b = (-2*self.kappa + sqrt) / (self.dim-1)
         a = ((self.dim-1) + 2*self.kappa + sqrt) / 4
         d = 4*a*b / (1+b) - (self.dim -1) * np.log(self.dim-1)
@@ -52,7 +52,7 @@ class VonMisesFisher():
             u = np.random.uniform()
             cond = (self.dim -1)*np.log(t) - t + d
 
-            if cond >= u:
+            if cond >= np.log(u):
                 w.append(w_prop)
                 continue
 

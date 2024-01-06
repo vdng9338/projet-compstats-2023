@@ -62,7 +62,7 @@ def main():
     transform = RandomLinkSplit(num_val=.05, num_test=.1, is_undirected=True, split_labels=True)
     train_data, val_data, test_data = transform(dataset[0])
     adj_matrix = torch_geometric.utils.to_dense_adj(train_data.edge_index).to(device)
-    model = VGAE(x_dim, latent_dim=16, dropout=0.0).to(device)
+    model = VGAE(x_dim, latent_dim=16, latent_distr='vMF', dropout=0.0).to(device)
     optimizer = Adam(model.parameters(), lr=0.01)
     num_epochs = 200
     for epoch in range(num_epochs):
