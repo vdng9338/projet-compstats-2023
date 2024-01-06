@@ -1,4 +1,5 @@
 \documentclass[hyperref={pdftex}]{beamer}
+\usepackage{algorithm,algorithmic}
 \useoutertheme{shadow}
 \usetheme{Madrid}
 % \addbibresource{references.bib}
@@ -35,7 +36,7 @@
 
 \author{Victor Deng \and Inès Vati}
 \institute[MVA]{École Normale Supérieure Paris-Saclay, Master MVA}
-\date{Presentation date$>$ \\ \vspace{0.3cm} \includegraphics[scale=0.2]{figures/teaser.png}}
+\date{$10^{\textrm{th}}$ JAN $2024$\\ \vspace{0.3cm} \includegraphics[scale=0.2]{figures/spherical_video.png}}
 
 \logo{\includegraphics[width=0.6cm]{figures/MVA-logo.png}}
 
@@ -86,9 +87,7 @@
 \end{frame} 
 
 \section{Introduction} 
-\begin{frame}{Introduction}
-  introduire la méthode et les contributions \cite{davidson_hyperspherical_2022}
-  \end{frame}
+\input{content/0introduction.tex}
 
 \section{Sampling method}
 \input{content/1sampling.tex}
@@ -105,7 +104,7 @@
 \input{content/4conclusion.tex}
 
 \begin{frame}{References}
-  \bibliographystyle{plain} % Warning cite reference not with number but with name
+  \bibliographystyle{alpha} % Warning cite reference not with number but with name
   \bibliography{references}
 \end{frame}
 
