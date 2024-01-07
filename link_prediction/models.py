@@ -33,6 +33,7 @@ class VGAEEncoder(nn.Module):
         logsigma2s_kappas = self.conv2_sigma2_kappa(X, graph).squeeze(-1)
         if self.latent_distr == 'vMF':
             mus = F.normalize(mus, dim=-1)
+            logsigma2s_kappas = self.softplus(logsigma2s_kappas)
         return mus, logsigma2s_kappas
     
 class VGAE(nn.Module):
@@ -112,8 +113,8 @@ class VGAE(nn.Module):
     
     def forward(self, X, graph):
         if self.latent_distr == 'vMF':
-            mus, logkappas = self.encoder(X, graph)
-            kappas = torch.exp(logkappas)
+            mus, kappas = self.encoder(X, graph)
+            #kappas = torch.exp(logkappas)
             Z = self.sample_vMF(mus, kappas)
         else:
             mus, logsigma2s = self.encoder(X, graph)
@@ -122,6 +123,6 @@ class VGAE(nn.Module):
             Z = mus + sigmas.unsqueeze(1) * eps
         ZZt = torch.matmul(Z, Z.transpose(0, 1))
         if self.latent_distr == 'vMF':
-            return ZZt, mus, logkappas
+            return ZZt, mus, kappas
         else:
             return ZZt, mus, logsigma2s
