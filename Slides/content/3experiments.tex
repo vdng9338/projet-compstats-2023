@@ -1,12 +1,26 @@
 \begin{frame}{Experiments on link prediction}
 
-    - Expliquer l'expérience (tâche à faire, données, negative sampling) (Victor)
+  \begin{itemize}
+    \item Link prediction on a graph dataset: given a graph with some edges removed, predict the likelihood
+    for each pair of nodes to be connected by an edge
+    \item Cora dataset \cite{McCallum_2000}: 2708 publications, 5429 links, 1433-dimensional feature vectors
+    \item Using a Variational Graph Auto-Encoder \cite{kipf_variational_2016}: a variational encoder which uses a
+    graph neural network (GNN) as encoder
+    \item Reconstruction loss:
+        $$ \mathbb{E}_{q(\mathbf{Z}|\mathbf{X}, \mathbf{A})}(\log p(\mathbf{A}|\mathbf{Z})) \quad 
+        \text{where} p(\mathbf{A}|\mathbf{Z}) = \prod_{i = 1}^N \prod_{j=1}^N p(A_{i, j}|\mathbf{z}_i, \mathbf{z}_j) $$
+    \item Negative sampling: in the sum $\sum_{i, j} \log p(A_{i, j}|\mathbf{z}_i, \mathbf{z}_j)$, keep all
+    positive edges and one randomly sampled negative edge per positive edge
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{TODO}
 
     reproduire l'experience 
   
-    - data (Ines)
+    - \sout{data} (Ines)
   
-    - implementer les modèles (Victor VGAE)
+    - \sout{implementer les modèles} (Victor VGAE)
     
     - gradients pour le hyperspherical VAE (Inès)
     
