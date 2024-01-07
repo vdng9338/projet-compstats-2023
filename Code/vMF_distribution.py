@@ -56,7 +56,7 @@ class VonMisesFisher():
     
     def sample_w(self, kappa : float, n_samples):
         """ acceptance rejection sampling """
-        sqrt = torch.sqrt(2 * kappa**2 + (self.dim-1)**2)
+        sqrt = torch.sqrt(4 * kappa**2 + (self.dim-1)**2)
         b = (-2*kappa + sqrt) / (self.dim-1)
 
         a = ((self.dim-1) + 2*kappa + sqrt) / 4
@@ -75,9 +75,10 @@ class VonMisesFisher():
                 continue
 
             count += 1
-            if count > 1e99:
+            if count > 1e8:
                 print('Warning : the while loop is too long')
                 return torch.tensor(w, dtype=self.dtype)
+            
         return torch.tensor(w, dtype=self.dtype) 
 
     def householder_transform(self, mu, x):
