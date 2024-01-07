@@ -6,6 +6,9 @@ import torch_geometric
 from torch_geometric import datasets
 from torch_geometric.transforms import RandomLinkSplit
 from sklearn.metrics import roc_auc_score, average_precision_score
+import numpy as np
+import matplotlib.pyplot as plt
+import os
 
 def train_val_test_split(data, val=.05, test=.1):
     edge_index = data.edge_index
@@ -62,25 +65,71 @@ def main():
     transform = RandomLinkSplit(num_val=.05, num_test=.1, is_undirected=True, split_labels=True)
     train_data, val_data, test_data = transform(dataset[0])
     adj_matrix = torch_geometric.utils.to_dense_adj(train_data.edge_index).to(device)
-    model = VGAE(x_dim, latent_distr='vMF', dropout=0.0).to(device)
+    model = VGAE(x_dim, dropout=0.0).to(device)
     optimizer = Adam(model.parameters(), lr=0.01)
     num_epochs = 200
+    elbos = np.zeros(num_epochs)
+    train_aucs = np.zeros(num_epochs)
+    train_aps = np.zeros(num_epochs)
+    val_aucs = np.zeros(num_epochs)
+    val_aps = np.zeros(num_epochs)
+    test_aucs = np.zeros(num_epochs)
+    test_aps = np.zeros(num_epochs)
     for epoch in range(num_epochs):
         optimizer.zero_grad()
         output, mus, logsigma2s = model(train_data.x.to(device), train_data.edge_index.to(device))
         minus_elbo_est = -elbo_estimate(output, mus, logsigma2s, adj_matrix)
         minus_elbo_est.backward()
         optimizer.step()
-        print(f'Epoch {epoch}: ELBO estimate = {-minus_elbo_est.detach().cpu().item()}')
+        elbo = -minus_elbo_est.detach().cpu().item()
+        print(f'Epoch {epoch}: ELBO estimate = {elbo}')
+        elbos[epoch] = elbo
+        labels_train, probs_train = labels_probs(output, train_data.pos_edge_label_index.transpose(0, 1), train_data.neg_edge_label_index.transpose(0, 1))
         labels_val, probs_val = labels_probs(output, val_data.pos_edge_label_index.transpose(0, 1), val_data.neg_edge_label_index.transpose(0, 1))
         labels_test, probs_test = labels_probs(output, test_data.pos_edge_label_index.transpose(0, 1), test_data.neg_edge_label_index.transpose(0, 1))
+        train_auc = roc_auc_score(labels_train, probs_train)
+        train_ap = average_precision_score(labels_train, probs_train)
         val_auc = roc_auc_score(labels_val, probs_val)
         val_ap = average_precision_score(labels_val, probs_val)
         test_auc = roc_auc_score(labels_test, probs_test)
         test_ap = average_precision_score(labels_test, probs_test)
+        print(f'Train AUC: {train_auc}, train AP: {train_ap}')
         print(f'Validation AUC: {val_auc}, validation AP: {val_ap}')
         print(f'Test AUC: {test_auc}, test AP: {test_ap}')
-    
+        train_aucs[epoch] = train_auc
+        train_aps[epoch] = train_ap
+        val_aucs[epoch] = val_auc
+        val_aps[epoch] = val_ap
+        test_aucs[epoch] = test_auc
+        test_aps[epoch] = test_ap
+    path_to_figures = "Slides/figures"
+    fig = plt.figure()
+    plt.plot(elbos)
+    plt.title("ELBO estimates per epoch")
+    plt.xlabel("Epoch")
+    plt.ylabel("ELBO estimate")
+    plt.show()
+    fig.savefig(os.path.join(path_to_figures, "normal_elbo_estimates.pdf"))
+    fig = plt.figure()
+    plt.plot(train_aucs, label="Train")
+    plt.plot(val_aucs, label="Validation")
+    plt.plot(test_aucs, label="Test")
+    plt.title("ROC AUC per epoch")
+    plt.xlabel("Epoch")
+    plt.ylabel("ROC AUC")
+    plt.legend(loc="best")
+    plt.show()
+    fig.savefig(os.path.join(path_to_figures, "normal_auc.pdf"))
+    fig = plt.figure()
+    plt.plot(train_aps, label="Train")
+    plt.plot(val_aps, label="Validation")
+    plt.plot(test_aps, label="Test")
+    plt.title("Average precision per epoch")
+    plt.xlabel("Epoch")
+    plt.ylabel("Average precision")
+    plt.legend(loc="best")
+    plt.show()
+    fig.savefig(os.path.join(path_to_figures, "normal_ap.pdf"))
 
 if __name__ == '__main__':
     main()
