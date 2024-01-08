@@ -39,6 +39,7 @@ class VGAEEncoder(nn.Module):
 
         if self.latent_distr == 'vMF':
             mus = F.normalize(mus, dim=-1)
+            logsigma2s_kappas = logsigma2s_kappas.squeeze(-1)
         return mus, logsigma2s_kappas
     
 class VGAE(nn.Module):
@@ -80,7 +81,7 @@ class VGAE(nn.Module):
             mus, logkappas = self.encoder(X, graph)
             kappas = torch.exp(logkappas) # in the github, there is no exp but they add # the `+ 1` prevent collapsing behaviors
             vmf = VonMisesFisher(mus, kappas)
-            Z = vmf.sample()
+            Z, ws, epss, bs = vmf.sample()
         else:
             mus, logsigma2s = self.encoder(X, graph)
             sigmas = torch.exp(.5*logsigma2s)
@@ -89,6 +90,6 @@ class VGAE(nn.Module):
   
         ZZt = torch.matmul(Z, Z.transpose(0, 1))
         if self.latent_distr == 'vMF':
-            return ZZt, mus, logkappas
+            return ZZt, mus, logkappas, ws, epss, bs
         else:
             return ZZt, mus, logsigma2s
