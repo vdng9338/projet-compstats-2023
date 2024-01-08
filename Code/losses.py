@@ -4,15 +4,17 @@ import torch
 from scipy.special import iv, ive 
 
 def reconstruction_loss(model_output: torch.Tensor,
-                   edge_label_index: torch.Tensor,
-                   edge_label:torch.Tensor, 
+                   pos_edge_index: torch.Tensor,
+                   neg_edge_index:torch.Tensor, 
                    positive_weight: float = 1):
     
     log_sigmoid = -torch.log(1 + torch.exp(-model_output))
-    log_probs = log_sigmoid[tuple(edge_label_index)]
-    out_edge = model_output[tuple(edge_label_index)]
-    log_lik = torch.where(edge_label ==1, positive_weight*log_probs, log_probs - out_edge)
-    return log_lik.mean() # sum or mean ?
+    neg_value_probs = log_sigmoid[tuple(neg_edge_index)] - model_output[tuple(neg_edge_index)]
+
+    log_likelihood = positive_weight*log_sigmoid[tuple(pos_edge_index)].sum() 
+    log_likelihood += neg_value_probs.sum()
+
+    return log_likelihood # sum or mean ?
 
 # class reconstruction_loss(torch.autograd.Function):
 #     """ Reconstruction loss for vMF-VAE"""
@@ -40,7 +42,7 @@ class kl_div_vmf(torch.autograd.Function):
         ctx.save_for_backward(torch.tensor(dim), kappas)
         kl = kappas * bessel_1/bessel_2 + ( (dim/2 - 1)*torch.log(kappas) - (dim/2)*torch.log(torch.tensor(2*torch.pi)) - torch.log(bessel_2) ) \
             + (dim/2)*torch.log(torch.tensor(torch.pi)) + torch.log(torch.tensor(2)) - torch.lgamma(torch.tensor(dim/2))
-        return kl.mean() # sum or mean ?
+        return kl.sum() # sum or mean ?
         
     @staticmethod
     def backward(ctx, grad_kappa):
