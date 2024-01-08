@@ -37,8 +37,8 @@ class kl_div_vmf(torch.autograd.Function):
         ctx : context object to save tensors for backward pass
         """
         dim = mus.shape[-1]
-        bessel_1 = ive(dim/2, kappas) # I_{d/2}
-        bessel_2 = ive(dim/2 - 1, kappas)
+        bessel_1 = iv(dim/2, kappas) # I_{d/2}
+        bessel_2 = iv(dim/2 - 1, kappas)
         print('bessel_1', bessel_1)
         print('bessel_2', bessel_2)
         ctx.save_for_backward(torch.tensor(dim), kappas)
