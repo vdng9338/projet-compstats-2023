@@ -75,7 +75,7 @@ class VonMisesFisher():
                 continue
 
             count += 1
-            if count > 1e6:
+            if count > 1e7:
                 print('Warning : the while loop is too long')
                 return torch.tensor(w, dtype=self.dtype)
             

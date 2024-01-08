@@ -79,6 +79,7 @@ class VGAE(nn.Module):
         if self.latent_distr == 'vMF':
             mus, logkappas = self.encoder(X, graph)
             kappas = torch.exp(logkappas) # in the github, there is no exp but they add # the `+ 1` prevent collapsing behaviors
+
             vmf = VonMisesFisher(mus, kappas)
             Z = vmf.sample()
         else:
