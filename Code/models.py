@@ -85,7 +85,7 @@ class VGAE(nn.Module):
         else:
             mus, logsigma2s = self.encoder(X, graph)
             sigmas = torch.exp(.5*logsigma2s)
-            eps = self.normal.sample(mus.size())
+            eps = self.normal.sample(mus.size()).to(mus.device)
             Z = mus + sigmas * eps
   
         ZZt = torch.matmul(Z, Z.transpose(0, 1))
