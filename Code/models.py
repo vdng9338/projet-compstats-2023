@@ -7,6 +7,8 @@ from torch_geometric.nn.conv import GCNConv
 from typing import Literal
 from vMF_distribution import VonMisesFisher
 
+from von_mises_fisher import VonMisesFisherClone
+
 class VGAEEncoder(nn.Module):
     
     def __init__(
@@ -80,8 +82,15 @@ class VGAE(nn.Module):
         if self.latent_distr == 'vMF':
             mus, logkappas = self.encoder(X, graph)
             kappas = torch.exp(logkappas) # in the github, there is no exp but they add # the `+ 1` prevent collapsing behaviors
+            # print('BEF log_kappa', logkappas)
+            # print('BEF kappa', kappas)
             vmf = VonMisesFisher(mus, kappas)
             Z, ws, epss, bs = vmf.sample()
+
+            # TRY SAMPLE WITH THE AUTHOR'S CODE
+            # q_z = VonMisesFisherClone(mus, kappas)
+            # Z = q_z.rsample()
+
         else:
             mus, logsigma2s = self.encoder(X, graph)
             sigmas = torch.exp(.5*logsigma2s)

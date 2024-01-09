@@ -44,12 +44,12 @@ class kl_div_vmf(torch.autograd.Function):
         ctx : context object to save tensors for backward pass
         """
         dim = mus.shape[-1]
-        bessel_1 = iv_torch(dim/2, kappas) # I_{d/2}(\kappa)
+        bessel_1 = iv_torch(dim/2, kappas) # I_{d/2}(\kappa) : (n_nodes, 1)
         bessel_2 = iv_torch(dim/2 - 1, kappas)
-
-
+        # print('bessel_2', bessel_2)
+        
         ctx.save_for_backward(torch.tensor(dim), kappas)
-        kl = kappas * bessel_1/bessel_2 + ( (dim/2 - 1)*torch.log(kappas) - (dim/2)*torch.log(torch.tensor(2*torch.pi)) - torch.log(bessel_2) ) \
+        kl = kappas * bessel_1/(bessel_2 + 1e-5) + ( (dim/2 - 1)*torch.log(kappas) - (dim/2)*torch.log(torch.tensor(2*torch.pi)) - torch.log(bessel_2 + 1e-5) ) \
             + (dim/2)*torch.log(torch.tensor(torch.pi)) + torch.log(torch.tensor(2)) - torch.lgamma(torch.tensor(dim/2))
         return kl.sum()
         
@@ -58,8 +58,8 @@ class kl_div_vmf(torch.autograd.Function):
 
         dim, kappas = ctx.saved_tensors
         dim = dim.item()
-        g = .5 * kappas * ( ive_torch(dim/2 + 1, kappas) / ive_torch(dim/2 - 1, kappas) - ive_torch(dim/2, kappas) * ( ive_torch(dim/2 - 2, kappas) + ive_torch(dim/2, kappas) ) / ive_torch(dim/2 - 1, kappas)**2 + 1)
-        # print('grad_kappa', grad_kappa.shape) # here, grad_kappa = []
+        g = .5 * kappas * ( ive_torch(dim/2 + 1, kappas) / (ive_torch(dim/2 - 1, kappas) + 1e-5) - ive_torch(dim/2, kappas) * ( ive_torch(dim/2 - 2, kappas) + ive_torch(dim/2, kappas) ) / (ive_torch(dim/2 - 1, kappas)**2 + 1e-5) + 1)
+        # print('grad_kappa', grad_kappa) # here, grad_kappa = []
         # print('g', g.shape)
-        return g, None
+        return g * grad_kappa, None
     

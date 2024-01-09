@@ -56,6 +56,7 @@ class VonMisesFisher():
     
     def sample_w(self, kappa : torch.Tensor, n_samples):
         """ acceptance rejection sampling """
+        
         sqrt = torch.sqrt(4 * kappa**2 + (self.dim-1)**2)
         b = (-2*kappa + sqrt) / (self.dim-1)
 
@@ -67,20 +68,28 @@ class VonMisesFisher():
         count = 0
         for i in range(n_samples):
             while True:
+                count += 1
+                if count > 1e7:
+                    print('Warning : the while loop is too long')
+                    return w, epss, b
+                
                 eps = torch.tensor(beta.rvs((self.dim -1)/2, (self.dim -1)/2, size=1), device=kappa.device)
                 w_prop = (1 - (1+b)*eps[0]) / (1 - (1-b)*eps[0])
                 t = 2*a*b / (1 - (1-b)*eps[0])
                 u = torch.rand(())
                 cond = (self.dim - 1)*torch.log(t) - t + d
+
                 if cond >= torch.log(u):
                     w[i] = w_prop
                     epss[i] = eps
                     break
 
-                count += 1
-                if count > 1e7:
-                    print('Warning : the while loop is too long')
-                    return w, epss
+                if count % 100 == 0:
+                    print(f'AR took {count} iterations')
+                    print(f'cond : {cond} ')
+                    print(f'kappa : {kappa}')
+                
+            # print(f'Acceptance-rejection took {count} iterations')
             
         return w, epss, b 
 
