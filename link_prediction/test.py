@@ -4,6 +4,7 @@ from torch.optim import Adam
 from models import VGAE
 import torch_geometric
 from torch_geometric import datasets
+from torch_geometric.utils import negative_sampling
 from torch_geometric.transforms import RandomLinkSplit
 from sklearn.metrics import roc_auc_score, average_precision_score
 import numpy as np
@@ -41,12 +42,21 @@ def log_likelihood(adj_matrix, model_output, positive_weight):
     log_probs = torch.where(adj_matrix > 0.1, positive_weight*log_sigmoid, log_sigmoid - model_output)
     return torch.sum(log_probs)
 
+def log_likelihood_negative_sampling(model_output, pos_edge_index, neg_edge_index, positive_weight=1.0):
+    log_sigmoid = -torch.log(1+torch.exp(-model_output))
+    ret = positive_weight*log_sigmoid[tuple(pos_edge_index)].sum()
+    ret += (log_sigmoid - model_output)[tuple(neg_edge_index)].sum()
+    return ret
+
 def kl_divergence(mus, logsigma2s):
     N, k = mus.shape
-    return .5*(k*torch.sum(torch.exp(logsigma2s)) + torch.tensordot(mus, mus) - N*k - k*torch.sum(logsigma2s))
+    return .5*(torch.sum(torch.exp(logsigma2s)) + torch.tensordot(mus, mus) - N*k - torch.sum(logsigma2s))
 
 def elbo_estimate(model_output, mus, logsigma2s, adj_matrix):
     return log_likelihood(adj_matrix, model_output, 200) - kl_divergence(mus, logsigma2s)
+
+def elbo_estimate_neg_sampling(model_output, mus, logsigma2s, pos_edge_index, neg_edge_index):
+    return log_likelihood_negative_sampling(model_output, pos_edge_index, neg_edge_index) - .005*kl_divergence(mus, logsigma2s)
 
 def labels_probs(model_output, pos_edge_list, neg_edge_list):
     prob_matrix = torch.sigmoid(model_output).cpu().detach()
@@ -78,7 +88,9 @@ def main():
     for epoch in range(num_epochs):
         optimizer.zero_grad()
         output, mus, logsigma2s = model(train_data.x.to(device), train_data.edge_index.to(device))
-        minus_elbo_est = -elbo_estimate(output, mus, logsigma2s, adj_matrix)
+        train_neg_edge_index = negative_sampling(train_data.edge_index, force_undirected=True)
+        #minus_elbo_est = -elbo_estimate(output, mus, logsigma2s, adj_matrix)
+        minus_elbo_est = -elbo_estimate_neg_sampling(output, mus, logsigma2s, train_data.edge_index, train_neg_edge_index)
         minus_elbo_est.backward()
         optimizer.step()
         elbo = -minus_elbo_est.detach().cpu().item()

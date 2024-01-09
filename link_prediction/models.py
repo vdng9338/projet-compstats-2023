@@ -21,7 +21,10 @@ class VGAEEncoder(nn.Module):
         self.relu1 = nn.ReLU()
         self.dropout1 = nn.Dropout(dropout)
         self.conv2_mu = GCNConv(interm_dim, latent_dim)
-        self.conv2_sigma2_kappa = GCNConv(interm_dim, 1)
+        if latent_distr == "normal":
+            self.conv2_sigma2_kappa = GCNConv(interm_dim, latent_dim)
+        else:
+            self.conv2_sigma2_kappa = GCNConv(interm_dim, 1)
         self.softplus = nn.Softplus()
         self.latent_distr = latent_distr
 
@@ -30,8 +33,9 @@ class VGAEEncoder(nn.Module):
         X = self.relu1(X)
         X = self.dropout1(X)
         mus = self.conv2_mu(X, graph)
-        logsigma2s_kappas = self.conv2_sigma2_kappa(X, graph).squeeze(-1)
+        logsigma2s_kappas = self.conv2_sigma2_kappa(X, graph)
         if self.latent_distr == 'vMF':
+            logsigma2s_kappas = torch.squeeze(logsigma2s_kappas, -1)
             mus = F.normalize(mus, dim=-1)
             logsigma2s_kappas = self.softplus(logsigma2s_kappas)
         return mus, logsigma2s_kappas
@@ -120,7 +124,7 @@ class VGAE(nn.Module):
             mus, logsigma2s = self.encoder(X, graph)
             sigmas = torch.exp(.5*logsigma2s)
             eps = torch.randn(mus.size(), device=mus.device)
-            Z = mus + sigmas.unsqueeze(1) * eps
+            Z = mus + sigmas * eps
         ZZt = torch.matmul(Z, Z.transpose(0, 1))
         if self.latent_distr == 'vMF':
             return ZZt, mus, kappas

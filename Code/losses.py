@@ -43,6 +43,20 @@ def iv_torch(order, x):
 def ive_torch(order, x):
     return ive(order, x.cpu()).to(x.device)
 
+def normal_reconstruction_loss(model_output: torch.Tensor,
+                   pos_edge_index: torch.Tensor,
+                   neg_edge_index:torch.Tensor,
+                   positive_weight: float = 1):
+    
+    log_sigmoid = -torch.log(1 + torch.exp(-model_output))
+    neg_value_probs = log_sigmoid[tuple(neg_edge_index)] - model_output[tuple(neg_edge_index)]
+    
+    log_likelihood = positive_weight*log_sigmoid[tuple(pos_edge_index)].sum() 
+
+    log_likelihood += neg_value_probs.sum()
+
+    return -log_likelihood
+
 def reconstruction_loss(model_output: torch.Tensor,
                    pos_edge_index: torch.Tensor,
                    neg_edge_index:torch.Tensor,
@@ -77,6 +91,10 @@ def reconstruction_loss(model_output: torch.Tensor,
 #     def backward(ctx, grad_x, grad_ind):
 #         pass
 
+def normal_kl_div(logsigma2s, mus):
+    N, k = mus.shape
+    return .5*(torch.sum(torch.exp(logsigma2s)) + torch.tensordot(mus, mus) - N*k - torch.sum(logsigma2s))
+
 class kl_div_vmf(torch.autograd.Function):
     """ KL divergence between vMF and uniform distribution in the hypersphere"""
 
@@ -103,5 +121,5 @@ class kl_div_vmf(torch.autograd.Function):
         g = .5 * kappas * ( ive_torch(dim/2 + 1, kappas) / (ive_torch(dim/2 - 1, kappas) + 1e-6) - ive_torch(dim/2, kappas) * ( ive_torch(dim/2 - 2, kappas) + ive_torch(dim/2, kappas) ) / (ive_torch(dim/2 - 1, kappas)+1e-6)**2 + 1)
         # print('grad_kappa', grad_kappa.shape) # here, grad_kappa = []
         # print('g', g.shape)
-        return g, None
+        return g*grad_kappa, None
     
