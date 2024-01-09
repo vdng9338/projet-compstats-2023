@@ -15,7 +15,7 @@ def reconstruction_loss(model_output: torch.Tensor,
 
     log_likelihood += neg_value_probs.sum()
 
-    return log_likelihood 
+    return -log_likelihood
 
 # class reconstruction_loss(torch.autograd.Function):
 #     """ Reconstruction loss for vMF-VAE"""
