@@ -29,3 +29,21 @@
     - entrainement et evaluation 
   
   \end{frame}
+
+  \begin{frame}{Loss computation}
+
+    \begin{itemize}
+      \item[$\blacksquare$] Reconstruction loss
+        \begin{itemize}
+          \item $$\mathcal{L}_{recon} =  - \mathbb{E}_{q_{\psi}}( log\ p_{\phi}(x | z)) $$
+          \item$$ -\nabla_{\kappa} \mathcal{L}_{recon} \approx g_{recon} + g_{cor} $$ 
+        \end{itemize}
+      \item[$\blacksquare$] KL Divergence 
+          \begin{itemize}
+            \item $$ \mathcal{L}_{\mathcal{KL}} = \mathcal{KL}(q(z|\mu, \kappa) || p(z)) $$
+            \item $$ \nabla_{\kappa} \mathcal{L}_{\mathcal{KL}} $$
+          \end{itemize}
+    \end{itemize}
+    The formulas were explicity computed in the article.
+    
+  \end{frame}
