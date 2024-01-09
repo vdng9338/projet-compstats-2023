@@ -56,7 +56,7 @@ def elbo_estimate(model_output, mus, logsigma2s, adj_matrix):
     return log_likelihood(adj_matrix, model_output, 200) - kl_divergence(mus, logsigma2s)
 
 def elbo_estimate_neg_sampling(model_output, mus, logsigma2s, pos_edge_index, neg_edge_index):
-    return log_likelihood_negative_sampling(model_output, pos_edge_index, neg_edge_index) - .005*kl_divergence(mus, logsigma2s)
+    return log_likelihood_negative_sampling(model_output, pos_edge_index, neg_edge_index)# - .005*kl_divergence(mus, logsigma2s)
 
 def labels_probs(model_output, pos_edge_list, neg_edge_list):
     prob_matrix = torch.sigmoid(model_output).cpu().detach()
@@ -75,7 +75,7 @@ def main():
     transform = RandomLinkSplit(num_val=.05, num_test=.1, is_undirected=True, split_labels=True)
     train_data, val_data, test_data = transform(dataset[0])
     adj_matrix = torch_geometric.utils.to_dense_adj(train_data.edge_index).to(device)
-    model = VGAE(x_dim, dropout=0.0).to(device)
+    model = VGAE(x_dim, latent_dim=16, latent_distr='vMF', dropout=0.0).to(device)
     optimizer = Adam(model.parameters(), lr=0.01)
     num_epochs = 200
     elbos = np.zeros(num_epochs)

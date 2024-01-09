@@ -74,11 +74,12 @@ def reconstruction_loss(model_output: torch.Tensor,
 
     log_likelihood += neg_value_probs.sum()
 
-    inside_g_cor = torch.sum(
+    """inside_g_cor = torch.sum(
         Log_VMF_normalizing_constant.apply(kappas, m) + ws*kappas
         + .5*(m-3)*torch.log(1-ws**2) + torch.log(torch.abs(-2*bs/((bs-1)*epss+1)**2)))
 
-    return -ExpectedReconstrLoss.apply(log_likelihood, inside_g_cor) # sum or mean ?
+    return -ExpectedReconstrLoss.apply(log_likelihood, inside_g_cor) # sum or mean ?"""
+    return -log_likelihood
 
 # class reconstruction_loss(torch.autograd.Function):
 #     """ Reconstruction loss for vMF-VAE"""
