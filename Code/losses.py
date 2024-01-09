@@ -13,7 +13,7 @@ class Log_VMF_normalizing_constant(torch.autograd.Function):
         bessel_value = torch.tensor(iv(m/2 - 1, kappa.cpu().detach().numpy()))
 
         if torch.any(bessel_value == 0.0) :
-            print("Warning: some Bessel value is 0")
+            print(f"Warning: some Bessel value is 0. min(kappa) = {torch.min(kappa)}, m={m}")
         return torch.where(bessel_value == 0.0, 0.0, (m/2-1)*torch.log(kappa) - m/2*np.log(2*np.pi) - torch.log(bessel_value))
     
     @staticmethod
@@ -21,7 +21,7 @@ class Log_VMF_normalizing_constant(torch.autograd.Function):
         kappa, = ctx.saved_tensors
         kappa = kappa.cpu().detach().numpy()
         m = ctx.dim_m
-        return grad_output * torch.tensor(-ive(m/2, kappa)/ive(m/2-1, kappa)), None
+        return grad_output * torch.tensor(-ive(m/2, kappa)/(ive(m/2-1, kappa)+1e-6)), None
 
 class ExpectedReconstrLoss(torch.autograd.Function):
     
@@ -91,7 +91,7 @@ class kl_div_vmf(torch.autograd.Function):
 
 
         ctx.save_for_backward(torch.tensor(dim), kappas)
-        kl = kappas * bessel_1/bessel_2 + ( (dim/2 - 1)*torch.log(kappas) - (dim/2)*torch.log(torch.tensor(2*torch.pi)) - torch.log(bessel_2) ) \
+        kl = kappas * bessel_1/(bessel_2+1e-6) + ( (dim/2 - 1)*torch.log(kappas) - (dim/2)*torch.log(torch.tensor(2*torch.pi)) - torch.log(bessel_2) ) \
             + (dim/2)*torch.log(torch.tensor(torch.pi)) + torch.log(torch.tensor(2)) - torch.lgamma(torch.tensor(dim/2))
         return kl.sum()
         
@@ -100,7 +100,7 @@ class kl_div_vmf(torch.autograd.Function):
 
         dim, kappas = ctx.saved_tensors
         dim = dim.item()
-        g = .5 * kappas * ( ive_torch(dim/2 + 1, kappas) / ive_torch(dim/2 - 1, kappas) - ive_torch(dim/2, kappas) * ( ive_torch(dim/2 - 2, kappas) + ive_torch(dim/2, kappas) ) / ive_torch(dim/2 - 1, kappas)**2 + 1)
+        g = .5 * kappas * ( ive_torch(dim/2 + 1, kappas) / (ive_torch(dim/2 - 1, kappas) + 1e-6) - ive_torch(dim/2, kappas) * ( ive_torch(dim/2 - 2, kappas) + ive_torch(dim/2, kappas) ) / (ive_torch(dim/2 - 1, kappas)+1e-6)**2 + 1)
         # print('grad_kappa', grad_kappa.shape) # here, grad_kappa = []
         # print('g', g.shape)
         return g, None

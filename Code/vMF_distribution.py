@@ -64,8 +64,8 @@ class VonMisesFisher():
         d = 4*a*b / (1+b) - (self.dim -1) * np.log(self.dim-1)
         w = torch.zeros(n_samples, device=kappa.device)
         epss = torch.zeros(n_samples, device=kappa.device)
-        count = 0
         for i in range(n_samples):
+            count = 0
             while True:
                 eps = torch.tensor(beta.rvs((self.dim -1)/2, (self.dim -1)/2, size=1), device=kappa.device)
                 w_prop = (1 - (1+b)*eps[0]) / (1 - (1-b)*eps[0])
@@ -80,8 +80,7 @@ class VonMisesFisher():
                 count += 1
                 if count > 1e7:
                     print('Warning : the while loop is too long')
-                    return w, epss
-            
+                    return w, epss, b
         return w, epss, b 
 
     def householder_transform(self, mu, x):
