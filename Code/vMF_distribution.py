@@ -54,7 +54,7 @@ class VonMisesFisher():
         w = 1 + torch.log(u + (1 - u) * torch.exp(-2 * kappa)) / kappa
         return w
     
-    def sample_w(self, kappa : float, n_samples):
+    def sample_w(self, kappa : torch.Tensor, n_samples):
         """ acceptance rejection sampling """
         sqrt = torch.sqrt(4 * kappa**2 + (self.dim-1)**2)
         b = (-2*kappa + sqrt) / (self.dim-1)
@@ -62,27 +62,30 @@ class VonMisesFisher():
         a = ((self.dim-1) + 2*kappa + sqrt) / 4
 
         d = 4*a*b / (1+b) - (self.dim -1) * np.log(self.dim-1)
-        w = []
+        w = torch.zeros(n_samples, device=kappa.device)
+        epss = torch.zeros(n_samples, device=kappa.device)
         count = 0
-        while len(w) < n_samples :
-            eps = beta.rvs((self.dim -1)/2, (self.dim -1)/2, size=1)
-            w_prop = (1 - (1+b)*eps[0]) / (1 - (1-b)*eps[0])
-            t = 2*a*b / (1 - (1-b)*eps[0])
-            u = np.random.uniform()
-            cond = (self.dim - 1)*torch.log(t) - t + d
-            if cond >= np.log(u):
-                w.append(w_prop)
-                continue
+        for i in range(n_samples):
+            while True:
+                eps = torch.tensor(beta.rvs((self.dim -1)/2, (self.dim -1)/2, size=1), device=kappa.device)
+                w_prop = (1 - (1+b)*eps[0]) / (1 - (1-b)*eps[0])
+                t = 2*a*b / (1 - (1-b)*eps[0])
+                u = torch.rand(())
+                cond = (self.dim - 1)*torch.log(t) - t + d
+                if cond >= torch.log(u):
+                    w[i] = w_prop
+                    epss[i] = eps
+                    break
 
-            count += 1
-            if count > 1e7:
-                print('Warning : the while loop is too long')
-                return torch.tensor(w, dtype=self.dtype)
+                count += 1
+                if count > 1e6:
+                    print('Warning : the while loop is too long')
+                    return w, epss
             
-        return torch.tensor(w, dtype=self.dtype) 
+        return w, epss, b 
 
     def householder_transform(self, mu, x):
-        e = torch.zeros(self.dim)
+        e = torch.zeros(self.dim, device=mu.device)
         e[0] = 1
         u = e - mu
         u = u / (u.norm(dim=-1, keepdim=True) + 1e-8)
@@ -90,20 +93,50 @@ class VonMisesFisher():
         return x - 2 * (x*u).sum(-1, keepdim=True) * u
     
     def sample(self, n_samples: int = 1):
+        """ 
+        Return :
+        z_samples : samples of size (n_mus, n_samples, self.dim) 
+            (n_mus is the number of set of parameters theta = (mu, kappa))
+            if n_samples == 1, z_samples is of size (n_mus, self.dim)
+        """
         z_samples = []
+        wss = []
+        epsss = []
+        bs = []
         for i in range(self.kappas.shape[0]):
             if self.dim == 3:
-                w = self.sample_w3D(kappa = self.kappas[i], n_samples=n_samples)[..., None]
+                w = self.sample_w3D(kappa = self.kappas[i], n_samples=n_samples)[..., None] # (n_samples, 1)
+
             else : # _TODO : case 2D
-                w = self.sample_w(kappa = self.kappas[i], n_samples=n_samples)[..., None]
+                w, epss, b = self.sample_w(kappa = self.kappas[i], n_samples=n_samples)
+                w = w[..., None] # (n_samples, 1)
 
-            v = np.random.multivariate_normal(mean=np.zeros(self.dim-1), cov=np.eye(self.dim-1), size=n_samples)
-            v = v / np.linalg.norm(v, axis=1)[..., None]
+            #v = np.random.multivariate_normal(mean=np.zeros(self.dim-1), cov=np.eye(self.dim-1), size=n_samples)
+            #v = v / np.linalg.norm(v, axis=1)[..., None]
+            v = torch.randn((n_samples, self.dim-1), device=self.kappas.device)
+            v = v / torch.norm(v, dim=-1)[..., None] # (n_samples, self.dim-1)
 
+
+            # w : (n_samples, 1)
+            # v : (n_samples, self.dim-1)
+            # torch.cat([w, v], axis=-1) : (n_samples, self.dim)
             z = torch.squeeze(torch.cat([w, torch.sqrt(1 - w**2)*v], axis=-1))
-     
+ 
+            if n_samples == 1:
+                z = z[0] # (self.dim)
+                if self.dim != 3:
+                    epss = epss[0]
+                    w = w[0]
             z_samples.append(self.householder_transform(self.mus[i], z))
 
-        return torch.stack(z_samples)
+            if self.dim != 3:
+                epsss.append(epss)
+                wss.append(w.squeeze(-1))
+                bs.append(b)
+
+        if self.dim != 3:
+            return torch.stack(z_samples), torch.stack(wss), torch.stack(epsss), torch.stack(bs)
+        else:
+            return torch.stack(z_samples), None, None, None
 
     
