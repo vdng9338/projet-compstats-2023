@@ -128,10 +128,6 @@ class VonMisesFisher():
                     epss = epss[0]
                     w = w[0]
             z_samples.append(self.householder_transform(self.mus[i], z))
-            epsss.append(epss)
-            wss.append(w.squeeze(-1))
-            bs.append(b)
-
             if self.dim != 3:
                 epsss.append(epss)
                 wss.append(w.squeeze(-1))
