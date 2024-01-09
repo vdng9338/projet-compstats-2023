@@ -1,11 +1,49 @@
 from typing import Any
 
 import torch 
-from scipy.special import iv, ive 
+from scipy.special import iv, ive
+import numpy as np
+
+class Log_VMF_normalizing_constant(torch.autograd.Function):
+    
+    @staticmethod
+    def forward(ctx, kappa, m):
+        ctx.save_for_backward(kappa)
+        ctx.dim_m = m
+        bessel_value = torch.tensor(iv(m/2 - 1, kappa.cpu().detach().numpy()))
+
+        if torch.any(bessel_value == 0.0) :
+            print("Warning: some Bessel value is 0")
+        return torch.where(bessel_value == 0.0, 0.0, (m/2-1)*torch.log(kappa) - m/2*np.log(2*np.pi) - torch.log(bessel_value))
+    
+    @staticmethod
+    def backward(ctx, grad_output):
+        kappa, = ctx.saved_tensors
+        kappa = kappa.cpu().detach().numpy()
+        m = ctx.dim_m
+        return grad_output * torch.tensor(-ive(m/2, kappa)/ive(m/2-1, kappa)), None
+
+class ExpectedReconstrLoss(torch.autograd.Function):
+    
+    @staticmethod
+    def forward(ctx, log_likelihood, inside_g_cor):
+        ctx.save_for_backward(log_likelihood)
+        return log_likelihood
+    
+    @staticmethod
+    def backward(ctx, grad_output):
+        log_likelihood, = ctx.saved_tensors
+        return grad_output, torch.exp(log_likelihood)*grad_output
+
 
 def reconstruction_loss(model_output: torch.Tensor,
                    pos_edge_index: torch.Tensor,
-                   neg_edge_index:torch.Tensor, 
+                   neg_edge_index:torch.Tensor,
+                   ws: torch.Tensor,
+                   kappas: torch.Tensor,
+                   bs: torch.Tensor,
+                   epss: torch.Tensor,
+                   m: int,
                    positive_weight: float = 1):
     
     log_sigmoid = -torch.log(1 + torch.exp(-model_output))
@@ -14,7 +52,11 @@ def reconstruction_loss(model_output: torch.Tensor,
     log_likelihood = positive_weight*log_sigmoid[tuple(pos_edge_index)].sum() 
     log_likelihood += neg_value_probs.sum()
 
-    return log_likelihood # sum or mean ?
+    inside_g_cor = torch.sum(
+        Log_VMF_normalizing_constant.apply(kappas, m) + ws*kappas
+        + .5*(m-3)*torch.log(1-ws**2) + torch.log(torch.abs(-2*bs/((bs-1)*epss+1)**2)))
+
+    return ExpectedReconstrLoss.apply(log_likelihood, inside_g_cor) # sum or mean ?
 
 # class reconstruction_loss(torch.autograd.Function):
 #     """ Reconstruction loss for vMF-VAE"""
