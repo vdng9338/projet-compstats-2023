@@ -32,3 +32,41 @@
   The formulas were explicity computed in the article.
   
 \end{frame}
+
+\begin{frame}{Training curves for $\mathcal{N}$-VGAE}
+  Latent dimension $16$, learning rate $0.01$. No KL divergence in loss.
+  \begin{center}
+    \includegraphics[width=.8\hsize]{figures/normal_elbo_estimates.pdf}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Area under ROC curve for $\mathcal{N}$-VGAE}
+  \begin{center}
+    \includegraphics[width=.8\hsize]{figures/normal_auc.pdf}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Average precision for $\mathcal{N}$-VGAE}
+  \begin{center}
+    \includegraphics[width=.8\hsize]{figures/normal_ap.pdf}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Training curves for $\mathcal{S}$-VGAE}
+  Latent dimension $16$, learning rate $0.01$. No KL divergence in loss.
+  \begin{center}
+    \includegraphics[width=.8\hsize]{figures/vMF_elbo_estimates.pdf}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Area under ROC curve for $\mathcal{S}$-VGAE}
+  \begin{center}
+    \includegraphics[width=.8\hsize]{figures/vMF_auc.pdf}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Average precision for $\mathcal{S}$-VGAE}
+  \begin{center}
+    \includegraphics[width=.8\hsize]{figures/vMF_ap.pdf}
+  \end{center}
+\end{frame}
