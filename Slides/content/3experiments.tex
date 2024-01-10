@@ -8,7 +8,7 @@
     graph neural network (GNN) as encoder
     \item Reconstruction loss:
         $$ \mathbb{E}_{q(\mathbf{Z}|\mathbf{X}, \mathbf{A})}(\log p(\mathbf{A}|\mathbf{Z})) \quad 
-        \text{where} p(\mathbf{A}|\mathbf{Z}) = \prod_{i = 1}^N \prod_{j=1}^N p(A_{i, j}|\mathbf{z}_i, \mathbf{z}_j) $$
+        \text{where} \quad p(\mathbf{A}|\mathbf{Z}) = \prod_{i = 1}^N \prod_{j=1}^N p(A_{i, j}|\mathbf{z}_i, \mathbf{z}_j) $$
     \item Negative sampling: in the sum $\sum_{i, j} \log p(A_{i, j}|\mathbf{z}_i, \mathbf{z}_j)$, keep all
     positive edges and one randomly sampled negative edge per positive edge
   \end{itemize}
