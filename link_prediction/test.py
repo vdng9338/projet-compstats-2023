@@ -121,7 +121,7 @@ def main():
     plt.xlabel("Epoch")
     plt.ylabel("ELBO estimate")
     plt.show()
-    fig.savefig(os.path.join(path_to_figures, "normal_elbo_estimates.pdf"))
+    fig.savefig(os.path.join(path_to_figures, "vMF_elbo_estimates.pdf"), bbox_inches = "tight")
     fig = plt.figure()
     plt.plot(train_aucs, label="Train")
     plt.plot(val_aucs, label="Validation")
@@ -131,7 +131,7 @@ def main():
     plt.ylabel("ROC AUC")
     plt.legend(loc="best")
     plt.show()
-    fig.savefig(os.path.join(path_to_figures, "normal_auc.pdf"))
+    fig.savefig(os.path.join(path_to_figures, "vMF_auc.pdf"), bbox_inches = "tight")
     fig = plt.figure()
     plt.plot(train_aps, label="Train")
     plt.plot(val_aps, label="Validation")
@@ -141,7 +141,7 @@ def main():
     plt.ylabel("Average precision")
     plt.legend(loc="best")
     plt.show()
-    fig.savefig(os.path.join(path_to_figures, "normal_ap.pdf"))
+    fig.savefig(os.path.join(path_to_figures, "vMF_ap.pdf"), bbox_inches = "tight")
 
 if __name__ == '__main__':
     main()
